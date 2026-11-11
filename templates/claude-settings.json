@@ -1,0 +1,53 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python >/dev/null 2>&1; then av_python=python; else av_python=python3; fi; \"$av_python\" -c 'import pathlib,subprocess,sys;r=pathlib.Path.home()/\".config/agent-memory/router.py\";p=r if r.is_file() else pathlib.Path(subprocess.check_output([\"git\",\"rev-parse\",\"--show-toplevel\"],text=True,encoding=\"utf-8\").strip())/\"scripts/agent-memory.py\";import runpy;sys.path.insert(0,str(p.parent));sys.argv=[str(p),\"hook\",\"--agent\",\"claude\"];runpy.run_path(str(p),run_name=\"__main__\")'",
+            "timeout": 30,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python >/dev/null 2>&1; then av_python=python; else av_python=python3; fi; \"$av_python\" -c 'import pathlib,subprocess,sys;r=pathlib.Path.home()/\".config/agent-memory/router.py\";p=r if r.is_file() else pathlib.Path(subprocess.check_output([\"git\",\"rev-parse\",\"--show-toplevel\"],text=True,encoding=\"utf-8\").strip())/\"scripts/agent-memory.py\";import runpy;sys.path.insert(0,str(p.parent));sys.argv=[str(p),\"hook\",\"--agent\",\"claude\"];runpy.run_path(str(p),run_name=\"__main__\")'",
+            "timeout": 30,
+            "shell": "bash"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python >/dev/null 2>&1; then av_python=python; else av_python=python3; fi; \"$av_python\" -c 'import pathlib,subprocess,sys;r=pathlib.Path.home()/\".config/agent-memory/router.py\";p=r if r.is_file() else pathlib.Path(subprocess.check_output([\"git\",\"rev-parse\",\"--show-toplevel\"],text=True,encoding=\"utf-8\").strip())/\"scripts/agent-memory.py\";import runpy;sys.path.insert(0,str(p.parent));sys.argv=[str(p),\"hook\",\"--agent\",\"claude\"];runpy.run_path(str(p),run_name=\"__main__\")'",
+            "timeout": 30,
+            "shell": "bash"
+          }
+        ],
+        "matcher": "Bash|PowerShell|Read|Edit|Write|Glob|Grep"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python >/dev/null 2>&1; then av_python=python; else av_python=python3; fi; \"$av_python\" -c 'import pathlib,subprocess,sys;r=pathlib.Path.home()/\".config/agent-memory/router.py\";p=r if r.is_file() else pathlib.Path(subprocess.check_output([\"git\",\"rev-parse\",\"--show-toplevel\"],text=True,encoding=\"utf-8\").strip())/\"scripts/agent-memory.py\";import runpy;sys.path.insert(0,str(p.parent));sys.argv=[str(p),\"hook\",\"--agent\",\"claude\"];runpy.run_path(str(p),run_name=\"__main__\")'",
+            "timeout": 30,
+            "shell": "bash"
+          }
+        ]
+      }
+    ]
+  }
+}

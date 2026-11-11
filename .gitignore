@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.memory-runtime/
+.vault-backups/
+.obsidian/
+.env
+.env.*
