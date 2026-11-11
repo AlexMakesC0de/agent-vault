@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="96" height="96" role="img" aria-label="Agent Vault">
+  <rect width="32" height="32" rx="6" fill="#F2EFE6"/>
+  <path d="M16 9.5C13 7.5 8.5 7 4 7.5v17c4.5-.5 9 0 12 2 3-2 7.5-2.5 12-2v-17c-4.5-.5-9 0-12 2z" fill="#FAF8F2" stroke="#17150F" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 9.5v17" stroke="#17150F" stroke-width="2"/>
+  <path d="M20 8.2V17l2.2-1.8 2.2 1.8V7.7" fill="#B4471C"/>
+</svg>
