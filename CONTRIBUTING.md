@@ -53,7 +53,7 @@ Open `demo.html` in a browser at 1280 pixels wide and save light and dark captur
 
 ## Translations
 
-`README.md` is the source of truth. Translated READMEs (`README.zh-CN.md`, `README.es.md`, `README.ja.md`) may lag behind it. Corrections and new languages are welcome; keep commands, paths and code blocks exactly as in the English version.
+`README.md` is the source of truth. Translated READMEs (`README.zh-CN.md`, `README.es.md`, `README.ja.md`, `README.ko.md`, `README.pt-BR.md`, `README.de.md`) may lag behind it. Corrections and new languages are welcome; keep commands, paths and code blocks exactly as in the English version.
 
 ## License
 

@@ -12,7 +12,7 @@
 ![Windows | macOS | Linux](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-555)
 ![Claude Code | Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20Codex-B4471C)
 
-[English](README.md) · **简体中文** · [Español](README.es.md) · [日本語](README.ja.md)
+[English](README.md) · **简体中文** · [Español](README.es.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Português (Brasil)](README.pt-BR.md) · [Deutsch](README.de.md)
 
 本文为译文，如与英文版 [README.md](README.md) 有出入，以英文版为准。
 
