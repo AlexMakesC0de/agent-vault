@@ -11,6 +11,8 @@ python3 ~/.config/agent-memory/router.py context --prompt 'YourProject'
 python3 ~/.config/agent-memory/router.py search merge jobs --project myapp
 # Read-only health check: install provenance, registry folders, hooks, profile caps; exit 1 on any problem:
 python3 ~/.config/agent-memory/router.py doctor --fetch
+# Read-only page of your profile, vaults, people notes and recent changes; refuses to write into a vault or project:
+python3 ~/.config/agent-memory/view.py --open
 # Central preference, using real evidence and the current revision:
 python3 scripts/agent-memory.py --profile /absolute/path/to/private-profile update --target user --id preference --kind explicit --text 'A verified user preference.' --source 'notes/preferences.md#evidence' --agent human --expected-revision 1
 # Authored identity, preserved before/after in history:
@@ -31,6 +33,4 @@ Open the private profile and each project as separate vaults. Start project navi
 
 ## Development
 
-Run `python3 -m unittest discover -s scripts/tests -q` (`python` on Windows). The suite exercises real temporary homes, repositories, profiles, migration archives and shell commands. CI runs native Windows Python 3.11/3.13, macOS and Linux. Tests verify our commands and protocol; actual client activation also depends on trust and client support.
-
-Hermes inspired the identity/user/memory separation. No upstream implementation is copied. The toolkit is MIT licensed.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for the development setup, the test suite and the rules every change follows. Tests verify our commands and protocol; actual client activation also depends on trust and client support.

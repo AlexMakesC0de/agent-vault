@@ -274,7 +274,7 @@ def install(directory, args):
         files[directory/SKILL]=skill.read_bytes()
         files[args.home/'.claude'/SKILL]=skill.read_bytes()
     files[directory/'router.py']=Path(__file__).read_bytes()
-    for name in ['agent-memory.py','profile_memory.py','vault_runtime.py','vault_search.py','vault_doctor.py']:
+    for name in ['agent-memory.py','profile_memory.py','vault_runtime.py','vault_search.py','vault_doctor.py','view.py']:
         files[directory/name]=Path(__file__).with_name(name).read_bytes()
     import vault_doctor
     record=vault_doctor.provenance(__file__,files,directory)

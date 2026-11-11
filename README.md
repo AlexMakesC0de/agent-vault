@@ -1,131 +1,262 @@
+<div align="center">
+
+<img src="docs/assets/logo.svg" width="88" height="88" alt="Agent Vault logo">
+
 # Agent Vault
 
-Give your coding agents **one shared personal memory**, plus a separate memory for each project. It works on Windows, macOS and Linux.
+**One shared memory for every coding agent you use, plus a separate memory for each project.**
 
-**Anyone with a copy can set up their own system.** This repo contains the tools. Each person creates their own profile; you do not need the author's private profile or any connection to their accounts.
+[![Tests](https://github.com/AlexMakesC0de/agent-vault/actions/workflows/tests.yml/badge.svg)](https://github.com/AlexMakesC0de/agent-vault/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)
+![Windows | macOS | Linux](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-555)
+![Claude Code | Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20Codex-B4471C)
 
-## Where things live
+**English** · [简体中文](README.zh-CN.md) · [Español](README.es.md) · [日本語](README.ja.md)
 
-```text
-Your chosen folder/
-├── agent-vault/          Tools you clone from this repo
-├── agent-profile/        Your personal memory, created during setup
-│   ├── SOUL.md           One identity shared by every agent
-│   ├── USER.md           Your preferences
-│   └── MEMORY.md         Lessons that apply across projects
-├── agent-vaults/         Your project memory, outside the project repos
-│   └── myapp/
-│       ├── MEMORY.md     Facts about MyApp only
-│       └── docs/knowledge/  Linked notes, read on demand
-└── MyApp/                Your existing project; Agent Vault adds nothing to it
+</div>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/viewer-dark.png">
+    <img src="docs/assets/viewer-light.png" width="860" alt="The Agent Vault memory page: a profile with size meters for SOUL.md, USER.md and MEMORY.md, and preference cards with their kind, source and a Copy request button">
+  </picture>
+  <br>
+  <sub>The read-only memory page, shown here with demo data.</sub>
+</p>
+
+Coding agents forget everything between sessions, and each agent keeps its own notes in its own format. Agent Vault gives Claude Code, Codex and any other agent that reads an instruction file **the same memory**: who you are and how you like to work, the lessons that apply everywhere, and the facts of whichever project you are in. It is plain Markdown on your disk, every change keeps its evidence and history, and nothing leaves your machine.
+
+## Contents
+
+- [Highlights](#highlights)
+- [How it works](#how-it-works)
+- [Quick start](#quick-start)
+- [Let your agent set it up](#let-your-agent-set-it-up)
+- [See your memory](#see-your-memory)
+- [Everyday commands](#everyday-commands)
+- [Project knowledge](#project-knowledge)
+- [More devices, teams and other agents](#more-devices-teams-and-other-agents)
+- [FAQ](#faq)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Highlights
+
+- **One profile, every agent.** Claude Code and Codex load the same identity, preferences and general lessons through hooks. Other agents use the same files through their instruction file.
+- **A vault per project.** Project facts load only when you work in that project, so one project's details never leak into another. Vaults live outside your repositories unless you choose to share one with your team.
+- **Small cores, linked notes.** Each core has a character limit so it fits in every session. Detail goes into linked topic notes that agents read only when a task needs them.
+- **Evidence and history.** Every saved fact records its source and kind (explicit, observed or inferred), and every change keeps the previous value. Stale writers are refused instead of overwriting each other.
+- **Reviews you can rely on.** Before an agent finishes, the hooks ask it to review what it learned and record that review, even when nothing changed.
+- **Search, a doctor and a viewer.** Ranked full-text search across all your memory, a read-only health check, and a static page that shows everything at a glance.
+- **Local and dependency-free.** Python standard library only. No server, no API key, no database to run.
+
+## How it works
+
+Your memory is a few folders of Markdown. A small router, installed once per machine, decides what each agent session sees.
+
+```mermaid
+flowchart LR
+    subgraph agents["Your agents"]
+        CC["Claude Code"]
+        CX["Codex"]
+        OA["Other agents"]
+    end
+    subgraph machine["Your machine"]
+        R["Router<br/><sub>~/.config/agent-memory</sub>"]
+        P["agent-profile/<br/><sub>SOUL · USER · MEMORY · notes</sub>"]
+        V1["agent-vaults/shopfront/<br/><sub>MEMORY · knowledge notes</sub>"]
+        V2["agent-vaults/data-pipeline/<br/><sub>MEMORY · knowledge notes</sub>"]
+    end
+    CC -- hooks --> R
+    CX -- hooks --> R
+    OA -- "instruction file" --> R
+    R -- "every session" --> P
+    R -- "working in shopfront" --> V1
+    R -- "working in data-pipeline" --> V2
 ```
 
-The profile is a local folder. A separate private GitHub repo is **optional**, for syncing that folder to your other devices. It does not create or connect a Claude, Codex or GitHub account.
+The profile always loads. A project vault loads when you name the project or work inside its folder, and its facts stay in that vault. Learning flows back the same way:
 
-## Set up your first machine
+```mermaid
+sequenceDiagram
+    autonumber
+    participant You
+    participant Agent
+    participant Hooks as Agent Vault hooks
+    participant Memory as Profile and vaults
+    You->>Agent: Start a session
+    Hooks->>Memory: Read profile, plus the project's vault
+    Memory-->>Agent: Identity, preferences, lessons, project facts
+    You->>Agent: "Fix the login bug"
+    Agent->>Agent: Works, reads linked notes it needs
+    Agent->>Hooks: Tries to finish
+    Hooks-->>Agent: Review what you learned first
+    Agent->>Memory: Save verified facts with evidence, or record "nothing new"
+    Agent-->>You: Final answer
+```
 
-You need **Python 3.11+**, **Git**, and Claude Code and/or Codex. On Windows, install Git for Windows with **Git Bash** as well. WSL is unnecessary. Agent Vault needs no extra API key, server or build step.
+## Quick start
 
-Examples enable both hook-based clients. **For Claude only, remove `--codex-hooks` from the `install` command.**
+You need **Python 3.11+**, **Git**, and Claude Code, Codex or both. On Windows, install Git for Windows (it includes Git Bash); WSL is not needed.
 
-### 0. Claude Code: avoid competing memory
+**1. Turn off Claude's auto memory** (Claude Code users). It is a separate store and would compete with Agent Vault. [Back up your notes and turn it off](docs/claude-auto-memory.md) first.
 
-Claude's built-in **auto memory** is a separate store. Leaving both systems active can produce duplicate or conflicting notes. **For one shared source of learned memory, turn Claude auto memory off on every device.** Agent Vault's installer does not change this setting for you.
+**2. Get the tools and create your profile.** Run this in the folder where `agent-vault` and `agent-profile` should live. Use `python3` on macOS and Linux, and leave out `--codex-hooks` if you only use Claude.
 
-1. **Preserve existing notes.** In Claude, use `/memory` to open the auto memory folder. Copy the whole memory folder, including its MEMORY.md index and topic files, to a private backup. Check home-directory sessions and each project you use; their folders may differ. If you use persistent subagents, also back up `~/.claude/agent-memory/`, `.claude/agent-memory/` and `.claude/agent-memory-local/` where present. Do not delete the originals.
-2. **Disable auto memory.** Use the auto memory toggle in `/memory`. Alternatively, merge this top-level key into your existing user settings: `~/.claude/settings.json` on macOS/Linux, or `%USERPROFILE%\.claude\settings.json` on Windows. Keep your other settings:
-
-   ```json
-   {
-     "autoMemoryEnabled": false
-   }
-   ```
-
-3. **Transfer useful knowledge deliberately.** After setting up Agent Vault below, review the backed-up notes. Import personal preferences/general lessons through its central memory CLI; put project facts in the owning project's vault. Retain source evidence and the private originals. This is not an automatic import.
-4. **Verify in a fresh session.** Restart Claude, check `/memory` shows auto memory off, and confirm learned notes are saved through Agent Vault to the selected profile/project. If auto memory stays on, check [settings overrides](https://code.claude.com/docs/en/settings#settings-precedence) or consult your administrator for managed settings.
-
-**Keep CLAUDE.md and Agent Vault hooks enabled.** Review old instructions that still tell Claude to save into its native memory folder; reconcile those specific instructions after backing them up. Do not redirect `autoMemoryDirectory` or symlink Claude's native memory into an Agent Vault folder: that would let another writer bypass the vault's state/history checks.
-
-See [Claude's official memory controls](https://code.claude.com/docs/en/memory#enable-or-disable-auto-memory). If the toggle is unavailable, update Claude Code. The same setting also disables Claude's built-in [persistent subagent memory](https://code.claude.com/docs/en/sub-agents#enable-persistent-memory).
-
-### 1. Clone the tools and create your profile
-
-Run these from the folder where you want `agent-vault` and `agent-profile` to live.
-
-**Windows — PowerShell**
-
-```powershell
+```bash
 git clone https://github.com/AlexMakesC0de/agent-vault.git
 cd agent-vault
 python scripts/agent-memory.py --profile ../agent-profile init-profile
 python scripts/project-memory-router.py install --profile ../agent-profile --codex-hooks
 ```
 
-**macOS / Linux — Terminal**
+Install keeps your existing client settings and backs them up first. It does not create any account or repository.
+
+**3. Add a project.** Point `--workspace` at an existing Git project; change `MyApp` and `myapp` to its name.
 
 ```bash
-git clone https://github.com/AlexMakesC0de/agent-vault.git
-cd agent-vault
-python3 scripts/agent-memory.py --profile ../agent-profile init-profile
-python3 scripts/project-memory-router.py install --profile ../agent-profile --codex-hooks
-```
-
-This creates your own starter profile and configures the clients to load it. It preserves existing client settings and backs them up. It does not create a GitHub repository.
-
-### 2. Add your project
-
-Stay inside `agent-vault`. Replace the example path with the full path to **your existing Git project**. You can also change `MyApp` and `myapp` to your project's name.
-
-**Windows**
-
-```powershell
 python scripts/setup-vault.py --vault ../agent-vaults/myapp --name MyApp
-python scripts/project-memory-router.py register --id myapp --name MyApp --root ../agent-vaults/myapp --workspace 'C:\Projects\MyApp'
+python scripts/project-memory-router.py register --id myapp --name MyApp --root ../agent-vaults/myapp --workspace /full/path/to/MyApp
 ```
 
-**macOS / Linux**
+The project repository is not changed. Repeat for each project; all of them share your one profile. To stop using a vault, run `project-memory-router.py unregister --id myapp`; the files stay.
 
-```bash
-python3 scripts/setup-vault.py --vault ../agent-vaults/myapp --name MyApp
-python3 scripts/project-memory-router.py register --id myapp --name MyApp --root ../agent-vaults/myapp --workspace /full/path/to/MyApp
-```
-
-The vault is a folder of your own. The project repository is not changed, so teammates are unaffected. Working anywhere in MyApp, including its worktrees, loads the vault. To stop using a vault, run `python scripts/project-memory-router.py unregister --id myapp` (`python3` on macOS/Linux); the files stay. Repeat this step for additional projects; keep the same personal profile.
-
-### Team-shared vault (optional)
-
-To share project memory with everyone who clones the repository, put the vault in the repository instead: `setup-vault.py --root /full/path/to/MyApp --name MyApp`, then `register` without `--workspace`. Codex users add `--codex-hooks` to the `setup-vault.py` command. This commits memory scripts, hooks and notes to the repository, and every teammate's agent loads them.
-
-**Already have an Agent Vault?** On another device, [follow the device guide](docs/devices.md) instead of creating empty memory. For an older project with a generated SOUL.md, [migrate it](docs/migration.md) first.
-
-### 3. Check it works
-
-Restart your coding client and review/trust its hooks when prompted. Start a fresh chat, even from your home directory, and ask:
+**4. Check it.** Restart your client and trust the hooks when it asks. In a fresh chat, ask:
 
 > Which central profile and MyApp project memory did you load? Show their paths and revisions.
 
-Expect the profile path to end in `agent-profile`, and the project path to point to your `agent-vaults/myapp` folder. Ask in the main conversation; Claude's `/btw` cannot inspect files or hooks.
+Then run the health check, which changes nothing:
 
-To check the install itself at any time, run `python ~/.config/agent-memory/router.py doctor` (`python3` on macOS/Linux; add `--fetch` to compare with the latest main). It reports whether the installed tools match a merged commit, whether every registered folder exists, whether the hooks are in place and how full your profile is, and it changes nothing. `install` also refuses to replace tools that came from a commit your checkout does not contain, so installing from `main` never silently undoes unmerged work.
+```bash
+python ~/.config/agent-memory/router.py doctor
+```
 
-## What happens after setup?
+<details>
+<summary><b>Where everything lives</b></summary>
 
-Every agent loads the same personal profile. Mentioning a registered project loads its own memory too. Agents are instructed to review useful learning before finishing: personal preferences go into your profile; project facts stay in that project. This depends on the client hooks running and the agent following the instructions.
+```text
+Your chosen folder/
+├── agent-vault/            The tools, cloned from this repository
+├── agent-profile/          Your memory, created by init-profile
+│   ├── SOUL.md             Who your agent is (one identity for all agents)
+│   ├── USER.md             Your preferences
+│   ├── MEMORY.md           Lessons that apply across projects
+│   └── notes/              Detail too long for the cores, read on demand
+├── agent-vaults/
+│   └── myapp/
+│       ├── MEMORY.md       Facts about MyApp only
+│       └── docs/knowledge/ Linked topic notes
+└── MyApp/                  Your project; Agent Vault adds nothing to it
 
-### Project knowledge is a graph
+~/.config/agent-memory/     Installed router, search index, viewer page
+```
 
-A project vault has two layers. `MEMORY.md` is a small core (2,200 characters) loaded every session, for rules that apply to almost every task. Everything else lives in `docs/knowledge/` as topic notes: one topic per note, grouped under area maps, linked to each other where they mention each other, and with no size limit. Agents start at the home map and follow links to only the notes a task needs, so context cost stays flat however large the codebase grows.
+</details>
 
-To build the graph for a project, ask your agent to use the **vault-knowledge** skill. The installer puts it in `~/.claude/skills/` for Claude and in the install folder for other agents. It surveys the repository, writes the maps, fills notes, and verifies the result with `check-knowledge`. When a vault has fewer than five topic notes, the session context asks the agent to offer this.
+## Let your agent set it up
 
-To find a note without knowing where it lives, agents run `router.py search` with a few words. It ranks matching notes across your profile and every registered vault, and prints a short snippet and the path of each. The search index is a single file in the install folder, built from the Markdown and updated automatically when notes change; deleting it is always safe.
+Prefer not to type the commands? Paste this into Claude Code or Codex, in an empty folder where the tools should live:
 
-Obsidian is optional: open your profile folder and each project folder as separate vaults. The agents read the Markdown directly, so Obsidian does not need to be running.
+```text
+Set up Agent Vault (https://github.com/AlexMakesC0de/agent-vault) on this machine.
+Read its README.md and follow the Quick start exactly, using python on Windows
+and python3 elsewhere.
+- Before step 1, show me what the Claude auto memory guide will change and wait
+  for my go-ahead.
+- Ask me which of my Git projects to add, and their full paths. Do not guess.
+- Ask whether I use Codex before adding --codex-hooks.
+- Do not change any project repository.
+- Finish by running router.py doctor and showing me its output.
+```
 
-**Memory does not sync automatically.** To use it on another device, put your profile in your own private Git repo and make each vault its own private Git repository (`git init` inside `agent-vaults/myapp`); a vault inside another Git checkout, including one repository around the whole `agent-vaults` folder, is refused. A file-sync tool can sync the whole folder. A team-shared vault travels with its project repo. [The device guide shows each step](docs/devices.md).
+Once it is installed, the agent already knows how to use the memory: the installer adds the instructions to your client.
 
-### Other agents
+## See your memory
 
-Claude Code and Codex load memory through hooks. Any other agent that reads an instruction file and can run a shell command can use the same memory: pass its instruction file to `install --instructions PATH` (repeatable). The guidance block tells the agent to run the context command at task start and to record learning through the memory CLI.
+```bash
+python ~/.config/agent-memory/view.py --open
+```
 
-[Memory commands](docs/maintenance.md) · [Existing-vault migration](docs/migration.md) · [Technical details and recovery](docs/architecture.md)
+This writes one HTML page to `~/.config/agent-memory/view.html` and opens it: your profile with its size meters, every registered project vault, your people notes and the latest changes. Inferred entries that are not loaded yet are drawn with a dashed border.
+
+The page is **read-only and loads nothing from the network**. To change something, press **Copy request** on a card and paste the text into your agent chat; the agent makes the change through the memory CLI, with history. Because the page contains your private profile, the viewer refuses to write it into a vault or project folder.
+
+## Everyday commands
+
+You rarely run these yourself: agents get them in their session context. They are here so you know what exists.
+
+| What | Command |
+| --- | --- |
+| Find where something is recorded | `python ~/.config/agent-memory/router.py search merge jobs --project myapp` |
+| Check the install and memory health | `python ~/.config/agent-memory/router.py doctor --fetch` |
+| Show your memory as a page | `python ~/.config/agent-memory/view.py --open` |
+| Print what a session would load | `python ~/.config/agent-memory/router.py context --prompt MyApp` |
+| List registered projects | `python ~/.config/agent-memory/router.py list` |
+| Save a fact (with evidence and the current revision) | `python ~/.config/agent-memory/agent-memory.py --root PATH update --help` |
+| Check a project's linked notes | `python ~/.config/agent-memory/agent-memory.py --root PATH check-knowledge` |
+
+[All memory commands](docs/maintenance.md)
+
+## Project knowledge
+
+A project vault has two layers. `MEMORY.md` is a small core loaded every session, for rules that apply to almost every task. Everything else lives in `docs/knowledge/` as topic notes: one topic per note, grouped under area maps and linked where they mention each other. Agents start at the map and open only the notes a task needs, so the cost of each session stays flat as the project grows.
+
+To build the notes for a project, ask your agent to use the **vault-knowledge** skill. It surveys the repository, writes the maps, fills the notes and verifies every link with `check-knowledge`. When a vault has fewer than five notes, the session context reminds the agent to offer this.
+
+[Obsidian](https://obsidian.md) is optional: open your profile and each vault as separate Obsidian vaults to browse the links. Agents read the Markdown directly, so it does not need to be running.
+
+## More devices, teams and other agents
+
+- **Another device.** Memory does not sync by itself. Put your profile in your own private Git repository and make each vault its own repository, then follow the [device guide](docs/devices.md).
+- **A vault for the whole team.** Put the vault inside the project repository with `setup-vault.py --root /path/to/MyApp --name MyApp` (add `--codex-hooks` for Codex) and register it without `--workspace`. This commits the memory scripts, hooks and notes to the repository, and everyone who clones it loads them.
+- **Other agents.** Any agent that reads an instruction file and can run a shell command can use the same memory: pass its file to `install --instructions PATH`.
+- **Older vaults.** A project with a generated `SOUL.md` from an earlier version needs [migrating](docs/migration.md) first.
+
+## FAQ
+
+<details>
+<summary><b>Does my memory leave my machine?</b></summary>
+
+No. The tools read and write local files and make no network requests of their own; the one exception is `doctor --fetch`, which runs `git fetch` on the toolkit clone. The agents you use see the memory they are given, as with any instruction file, so keep secrets and customer data out of it.
+</details>
+
+<details>
+<summary><b>Why are the cores limited in size?</b></summary>
+
+Your profile and the current project's core are sent to the agent in one hook message, which Claude Code caps at 10,000 characters. The limits (SOUL 1,500, USER 2,000, MEMORY 2,200) keep both inside it. At 85% the tools warn you, so detail moves into linked notes before a save is refused.
+</details>
+
+<details>
+<summary><b>Why Markdown files and not a database?</b></summary>
+
+You can read, diff and review every change in a pull request, the files outlive any tool, and the history checks are built on them. Search uses a SQLite index rebuilt from the Markdown, so deleting it is always safe.
+</details>
+
+<details>
+<summary><b>Does it replace Claude's own memory?</b></summary>
+
+Yes, if you want one source of truth. [Turn Claude's auto memory off](docs/claude-auto-memory.md) so the two do not compete. `CLAUDE.md` files keep working as before.
+</details>
+
+<details>
+<summary><b>What if an agent saves something wrong?</b></summary>
+
+Every change keeps the previous value in the store's history, and entries are only retired, never erased. Ask the agent to correct or retire the entry, or use the memory CLI yourself.
+</details>
+
+## Documentation
+
+[Memory commands](docs/maintenance.md) · [Device guide](docs/devices.md) · [Migration](docs/migration.md) · [Architecture and recovery](docs/architecture.md) · [Claude auto memory](docs/claude-auto-memory.md)
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the test suite and the few rules every change follows. To report a security problem, follow [SECURITY.md](SECURITY.md) instead of opening an issue.
+
+## Acknowledgements
+
+The split between identity, user preferences and memory was inspired by [Hermes](https://github.com/NousResearch/hermes-agent). No upstream code is copied.
+
+## License
+
+[MIT](LICENSE)

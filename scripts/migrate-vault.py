@@ -15,7 +15,7 @@ from vault_runtime import configure_io, file_lock
 HERE=Path(__file__).resolve().parent
 ARCHIVE=Path('docs/knowledge/memory/archive/central-v2')
 RECEIPT=Path('docs/knowledge/memory/MIGRATION-v2.json')
-TOOLS=['agent-memory.py','project-memory-router.py','vault_runtime.py','profile_memory.py','vault_search.py','vault_doctor.py']
+TOOLS=['agent-memory.py','project-memory-router.py','vault_runtime.py','profile_memory.py','vault_search.py','vault_doctor.py','view.py']
 
 
 def module(name,path):

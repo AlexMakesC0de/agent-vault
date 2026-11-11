@@ -63,7 +63,7 @@ def setup(args):
             raise ValueError(f'Inspect symlink before initializing {relative}')
         return path.read_text(encoding='utf-8') if path.exists() else ''
 
-    for filename in ['agent-memory.py', 'project-memory-router.py', 'vault_runtime.py', 'profile_memory.py', 'vault_search.py', 'vault_doctor.py']:
+    for filename in ['agent-memory.py', 'project-memory-router.py', 'vault_runtime.py', 'profile_memory.py', 'vault_search.py', 'vault_doctor.py', 'view.py']:
         relative = 'scripts/' + filename
         existing = read(relative)
         content = (HERE / filename).read_text(encoding='utf-8')
